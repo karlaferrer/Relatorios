@@ -1,0 +1,478 @@
+---
+title: "ASSOCIAÇÃO ENTRE PLANO DE SAÚDE E MAMOGRAFIA EM MULHERES DE 50 A 69 ANOS NAS CAPITAIS BRASILEIRAS – UMA APLICAÇÃO DE REGRESSÃO LOGÍSTICA UTILIZANDO INQUÉRITO COM PLANO AMOSTRAL COMPLEXO"
+author: "Karla Ferreira"
+lang: pt
+format: 
+  pdf: 
+    documentclass: report
+    lof: true
+    lot: true
+    geometry:
+      - top=30mm
+      - left=20mm
+      - heightrounded
+    fontfamily: libertinus
+    colorlinks: true
+    cite-method: biblatex
+knitr: :
+  echo: false
+  warning: false    
+bibliography:
+    -modelos.bib
+
+---
+
+```{r pacotes, include=FALSE, message=FALSE, warning=FALSE}
+#instalar e carregar pacotes
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(
+  equatiomatic, #escrever equacoes  
+  readxl, #ler arquivo excel
+  DescTools, #organizar variaveis
+  descr, #analise descritiva
+  finalfit, #checar dados faltantes
+  survey, #desenho amostral
+  tableone, #fazer tabela 1
+  knitr,
+  tidyverse,
+  ResourceSelection, #qualidade do ajuste
+  ggplot2,
+  gtsummary, # tabela OR e IC 
+  gridExtra # forest plot OR e IC 
+  )
+
+```
+
+```{r banco, include=FALSE, message=FALSE, warning=FALSE}
+# 0. Leitura do banco de dados
+
+df <- readxl::read_xls("Vigitel-2021-peso-rake.xls", col_types = "text")
+
+```
+
+```{r organiza }
+#1. Organizacao dos dados e dataframe
+#Subset variveis a serem usadas
+myvars<- c("cidade", "q6","q7", "civil", "q8a", "q74", "q81","q82", "q88",
+"inativo" , "depressao" ,"pesorake")
+
+df2<-df[myvars]
+
+# Reorganização das variaveis
+df2[,myvars] <- lapply(df2[,myvars] , factor)
+df2$q6<-as.numeric(df2$q6)
+df2$pesorake <- as.numeric(df2$pesorake)
+
+#separar mulheres a partir de 49 anos
+df2<-subset(df2, q7=="2")
+df2<-subset(df2, q6>49 & q6<70)
+
+#criar uma variavel para regiao 
+
+df2$regiao <- DescTools::Recode(df2$cidade,
+                     "Norte" = c(2,4,12,14,16,18,20),
+                     "Nordeste" = c(1,9,11,13,15,19,22,23,25),
+                     "Sudeste" = c(3,21,24,26),
+                     "Sul" = c(7,8,17),
+                     "Centro-Oeste" = c(5,6,10,27))
+
+#Recategorizar variaveis
+
+#faixa etaria
+df2$fx_etaria <- cut(df2$q6, breaks = c(49, 59, 69,100), right = FALSE)
+
+#civil - casado sim, nao
+df2$casada <- DescTools::Recode(df2$civil,
+                     "Sim" = c("2","3"),
+                     "Não" = c("1","4","5", "888"))
+#ensino superior
+df2$superior <- DescTools::Recode(df2$q8a,
+                    "Sim" = c("6","7"),
+                    "Não" = c("1","2","3","4","5","8", "777", "888"))
+
+#estado de saude - 3 categorias
+
+df2$q74 <- DescTools::Recode(df2$q74,
+                              "Bom" = c("1","2"),
+                              "Ruim" = c("3","4","5"),
+                              "SI"= c("777", "888"))
+  
+#Dicotomizar  mamografia
+df2$mam <- as.factor(ifelse(df2$q81== 1, "1","0"))
+
+#Pegar apenas quem fez mamografia
+df2<- subset(df2, mam == "1")
+
+#mamografia ultimos dois anos
+df2$mam2 <- DescTools::Recode(df2$q82,
+                              "Sim" = c("1","2"),
+                              "Não" = c("3","4","5","777"))
+
+#mamografia ultimos dois anos
+df2$mam3<-ifelse(df2$mam2 =="Sim",1,0)
+
+#plano de saude
+df2$plano <- DescTools::Recode(df2$q88,
+                    "Sim" = c("1","2"),
+                    "Não" = c("3","888"))
+
+#inativa
+df2$inativo <- DescTools::Recode(df2$inativo,
+                                  "Não" = "0",
+                                  "Sim" = "1")
+
+#depressao
+df2$depressao <- DescTools::Recode(df2$depressao,
+                                   "Não" = "0",
+                                   "Sim" = "1")
+
+
+                       
+#ajustar nome das colunas
+names(df2)<-c("cidade","idade", "sexo" ,"civil","escolaridade", "estado_saude",  
+             "mamografia", "t_mamograf","plano_saude",  
+             "inativa",  "depressao" ,"pesorake","regiao", "fx_etaria", 
+              "casada", "superior", "mam", "mam2","mam3" ,"plano") 
+
+  
+#Analise descritiva peliminar
+summary(df2)
+
+#raridade do evento
+descr::freq(df2$mamografia)
+
+# Analisando dados faltantes
+#df2 %>%
+#  finalfit::ff_glimpse(names(df2))
+
+```
+
+```{r amostra, include=FALSE, message=FALSE, warning=FALSE}
+#2.Declanar desenho amostral
+
+# Definindo o desenho
+BR.svy <- survey::svydesign( id=~1, strata =NULL, fpc=NULL,
+                     weights = ~pesorake, data=df2)
+
+# id -- variavel que define os clusters
+# ~1 significa que que não tem clusters
+# strata -- variável que define os estratos
+# fpc -- correção de população finita, aponta para a
+# variável do banco com o tamanho da população
+# weights -- pesos amostrais
+# data -- data frame com os dados gerados
+
+# Estimando o total de mulheres q fizeram  mamografia na populacao
+survey::svytotal(~mam2, BR.svy)
+
+# Estimando prevalência de mulheres que fizeram exame - 84%
+survey::svymean(~mam2, BR.svy) 
+```
+
+```{r tabela1, include=FALSE, message=FALSE, warning=FALSE}
+# 3. Tabela 1 com pesos da amostra
+
+
+tab1<- tableone::svyCreateTableOne(vars = c("regiao","idade","casada",
+                                  "superior","" ,"depressao",
+                                  "inativa", "plano", "estado_saude"), 
+                         strata = "mam2",test = FALSE, data = BR.svy)
+
+tabela1sw<-print (tab1, showAllLevels = TRUE,nonnormal = "idade")
+
+#knitr::kable(tabela1sw)
+#row.names = c("N", "Região", "Idade", "Casada",
+#"Ensino superior", "Inatividade física", "Plano de saúde", 
+#"Estado de saúde"))
+#knitr::kable (tabela1sw)
+
+```
+
+```{r simples, include=FALSE, message=FALSE, warning=FALSE}
+#4.Selecao de variaveis - Regressao logistica simples
+
+df2$mam3<-ifelse(df2$mam2 =="Sim",1,0)
+#Regiao
+regiao_svy<-survey::svyglm(mam3 ~ regiao, family=quasibinomial(),
+             design=BR.svy)
+summary (regiao_svy)
+#regiao sai -  pvalue >0.2 
+
+#idade
+idade_svy<-survey::svyglm(mam3 ~ idade, family=quasibinomial(),
+              design=BR.svy)
+summary (idade_svy)
+#idade fica -  pvalue < 0.2 
+
+#casada
+casada_svy<-survey::svyglm(mam3 ~ casada, family=quasibinomial(),
+              design=BR.svy)
+summary (casada_svy)
+#casada fica -  pvalue < 0.2 
+
+#superior
+superior_svy<-survey::svyglm(mam3 ~ superior, family=quasibinomial(),
+              design=BR.svy)
+summary (superior_svy)
+#superior fica -  pvalue < 0.2 
+
+#depressao
+depressao_svy<-survey::svyglm(mam3 ~ depressao, family=quasibinomial(),
+              design=BR.svy)
+summary (depressao_svy)
+#depressao sai -  pvalue > 0.2 
+
+#inativa
+inativa_svy<-survey::svyglm(mam3 ~ inativa, family=quasibinomial(),
+              design=BR.svy)
+summary(inativa_svy)
+#inativa fica -  pvalue < 0.2 
+
+#estado de saude
+saude_svy<-survey::svyglm(mam3 ~ estado_saude, family=quasibinomial(),
+              design=BR.svy)
+summary(saude_svy)
+#estado de saude fica -  pvalue < 0.2 
+
+#plano
+plano_svy<-survey::svyglm(mam3 ~ plano, family=quasibinomial(),
+              design=BR.svy)
+summary (plano_svy)
+#plano de saude fica -  pvalue < 0.2 
+
+```
+
+```{r multiplo, include=FALSE, message=FALSE, warning=FALSE}
+#5.Regressao logistica multipla
+#estado de saude
+mult_svy<-survey::svyglm(mam3 ~ idade + casada + superior + inativa + 
+                           estado_saude + plano, family=quasibinomial(),
+              design=BR.svy)
+summary(mult_svy)
+
+eq_ajust<-equatiomatic::extract_eq(mult_svy)
+
+```
+
+```{r,  message=FALSE, warning=FALSE}
+#6. Qualidade do ajuste
+#Hosmer-Lemeshow Tests for Logistic Regression Models
+teste <- ResourceSelection::hoslem.test(df2$mam3, fitted(mult_svy))
+teste
+
+#Grafico - Hosmer e Lemeshow
+teste_banco <- data.frame(obs=teste$observed[,2], esp=teste$expected[,2])
+
+ggplot(teste_banco, aes(x=obs, y=esp)) +
+geom_point() +
+geom_smooth() +labs(x="Observado",y="Esperado")+
+geom_abline(intercept=0, slope=1, size=0.5)+theme_bw()+theme(panel.grid=element_blank()) # linha de referência
+
+#pseudo- R2
+1 - (mult_svy$deviance / mult_svy$null.deviance)
+
+#logLik modelo - log-likelihood
+logLik(mult_svy)
+
+#AIC modelo_svy
+AIC(mult_svy)
+
+```
+
+```{r pressupostos}
+#7.Avaliacao de pressupostos do modelo
+#independencia 
+#linearidade
+
+res.dev<- residuals(mult_svy)#Residuos Deviance
+summary(res.dev)
+
+#Independencia 
+plot(res.dev,ylab="Resíduos Deviance",col="blue",main="Resíduos Deviance")
+lines(lowess(res.dev))
+abline(h=c(-2,0,2),col=c("red","grey","red"), lty=2)
+
+#O lowes (linha preta) apresenta ligeira curva, mas nao ha clusters de indivduos
+#indicando que nao ha fuga de independencia
+
+#log - linearidade
+plot(df2$idade,res.dev,ylab="Resíduos Deviance",col="darkgrey",main="Forma funcional",xlab="Idade")
+abline(h=c(-2,0,2),col=c("red","grey","red"), lty=2)
+lines(lowess(df2$idade,res.dev),col=3)
+#O lowes apresenta ligeira curva, mas nao indica
+# fuga de linearidade
+
+```
+
+```{r}
+#8. Resultados do modelo
+
+#summary(mult_svy)$coefficients
+library(gtsummary)
+
+theme_gtsummary_journal(journal = "jama")
+theme_gtsummary_compact()
+mult_svy%>%
+gtsummary::tbl_regression(exponentiate = TRUE, 
+               label = list(
+                idade ~ "Idade",
+                casada ~ "Casada",
+                superior ~ "Nível superior",
+                inativa ~ "Inativa",
+                estado_saude ~ "Estado de saúde",
+                plano ~ "Plano de saúde")
+) ->resultado
+
+show_header_names(resultado)
+
+mod_res<- resultado%>%
+  modify_header(label = "**Variável**", 
+                           p.value = "**valor-p**",
+                           estimate = "**OR (95% IC)**") 
+  modify_footnote(mod_res, ci="IC = Intervalo de confiança", abbreviation = FALSE)
+              
+
+mod_res
+
+```
+
+```{r}
+#8.1 Resultados do modelo - grafico
+#Grafico de OR alternativo
+## Load libraries
+library(gridExtra)
+library(ggplot2)
+
+
+#coeficientes e erro padra
+coefic<-coef(mult_svy)
+se_mult_svy<-sqrt(diag(vcov(mult_svy))) #se
+kable(coefic)
+kable(se_mult_svy)
+
+#OR e Ics
+OR_mult_svy<- round(exp(coefic),2)
+IC_mult_svy<-round(exp(confint(mult_svy)),2)
+
+
+## data frame
+## data frame
+dat <- data.frame(
+  Index = c(1,2,3,4,5,6), ## This provides an order to the data
+  label = c("Casada: não", "Superior: não", "Inativa: sim ", 
+            "Estado de saúde: ruim", "Estado de saúde: SI",
+            "Consumo de FVL: maior", "Plano de saúde:ruim")
+  OR = exp_mod6[-1,1],
+  LL = exp_mod6[-1,2],
+  UL = exp_mod6[-1,3]
+  
+)
+dat
+
+## Plot forest plot
+plot1 <- ggplot(dat, aes(y = Index, x = OR)) +
+  geom_point(shape = 18, size = 5) +  
+  geom_errorbarh(aes(xmin = LL, xmax = UL), height = 0.25) +
+  geom_vline(xintercept = 1, color = "red", linetype = "dashed", cex = 1, alpha = 0.5) +
+  scale_y_continuous(name = "", breaks=1:12, labels = dat$label, trans = "reverse") +
+  xlab("Odds Ratio (95% CI)") + 
+  ylab(" ") + 
+  theme_bw() +
+  theme(panel.border = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        axis.text.y = element_text(size = 12, colour = "black"),
+        axis.text.x.bottom = element_text(size = 12, colour = "black"),
+        axis.title.x = element_text(size = 12, colour = "black"))
+plot1
+
+```
+
+```{r}
+
+```
+
+
+**1. Introdução**
+
+O câncer de mama é a principal causa de morte por câncer entre as mulheres em todo o mundo e a carga da doença está mudando progressivamente dos países desenvolvidos para os países em desenvolvimento(1). No Brasil, o Instituto Nacional do Câncer (INCA) estimou 73.610 casos novos para o ano de 2023, o que representa uma taxa ajustada de incidência de 41,89 casos por 100.000 mulheres(2).
+
+O aumento da taxa de mortalidade por câncer de mama em países em desenvolvimento tem como um dos grandes problemas o início tardio do tratamento, que em parte ocorre devido a demora do diagnóstico(3). Um estudo de revisão integrativa indicou como fatores responsáveis pela demora no tratamento em países da América Latina, o mau gerenciamento da doença, as barreiras de acesso, problemas de comunicação e o atraso no diagnóstico. Além disso renda, educação e origem étnica foram determinantes para a diferença nos tempos de início de tratamento(4).
+
+No Brasil, dentre as diversas tecnologias para a detecção precoce do câncer de mama, o Ministério da Saúde recomenda o rastreamento com mamografia a cada dois anos em mulheres com idade entre 50 e 69 anos, pois é nesse grupo etário que se evidencia o melhor equilíbrio entre riscos e benefícios(5). De acordo com a edição de 2021 do Vigitel - *Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico*(6)*,* a proporção de mulheres de 50 a 69 anos que realizaram mamografia pelo menos uma vez nos últimos dois anos nas capitais brasileiras e no Distrito Federal foi de 72,8%. A Pesquisa Nacional de Saúde de 2019 do IBGE(7), que é representativa de todos os estados, mostrou que a proporção de mulheres que haviam realizado mamografia nos últimos dois anos foi 58,3% no Brasil. Os resultados da PNS 2019 indicaram uma importante variação regional quanto à cobertura na faixa etária preconizada, sendo a menor observada na Região Norte (43,2%) e a maior na Região Sudeste (65,2%). Essa pesquisa também evidencia diferenças no acesso ao exame associadas à escolaridade, renda e raça(7).
+
+Considerando os diferentes níveis de cobertura observados nas regiões geográficas do Brasil, assim como as diferenças devido à raça, escolaridade e renda, o objetivo desse trabalho foi investigar se a posse de plano de saúde está associada à realização de mamografia para rastreamento do câncer de mama em mulheres com idade entre 50 e 69 anos na periodicidade recomendada.
+
+**2. Métodos**
+
+Os dados analisados neste estudo foram coletados na edição 2021 do Vigitel. Os procedimentos de amostragem empreendidos nesse inquérito visam obter amostras probabilísticas da população de adultos com 18 anos ou mais de idade, que residem em domicílios servidos por ao menos uma linha telefônica fixa nas capitais dos 26 estados brasileiros e no Distrito Federal (DF).
+
+Na primeira etapa desse processo de amostragem são sorteadas milhares de linhas telefônicas e na segunda etapa sorteia-se um adulto residente do domicílio para realização da entrevista. Na edição de 2021 foram entrevistados 27.093 adultos, com uma taxa média de sucesso de 61%. O peso final atribuído a cada indivíduo entrevistado denominado de pós-estratificação (método *Rake*) possibilita a inferência de estimativas para toda a população residente nas capitais e DF, e não somente para aqueles servidos de linha telefônica fixa. Essa técnica "iguala" a composição sociodemográfica estimada na amostra à da população das 26 cidades e DF considerando as variáveis sexo, faixa etária e escolaridade. Maiores detalhes podem ser encontrados na publicação do Ministério da Saúde para esta pesquisa(6).
+
+As moradoras entrevistadas responderam questionário que incluía questões sociodemográficas e comportamentais. As variáveis utilizadas nesta análise foram, região geográfica, idade, nível de escolaridade, estado conjugal atual, inatividade física, depressão e quando foi realizada a última mamografia.
+
+**2.1 Variáveis de exposição e desfecho**
+
+Nesse estudo a variável de exposição foi possuir plano de saúde (dicotômica) e a variável de desfecho foi ter realizado ou não a última mamografia em até dois anos.
+
+Considerou-se como população alvo o grupo de mulheres de 50 a 69 anos residentes nas capitais brasileiras e no Distrito Federal. Essa é a faixa etária para às quais o rastreamento com mamografia bienal é recomendado(5).
+
+**2.2 Covariáveis de controle**
+
+Para estimar o efeito da posse do plano de saúde (exposição) sobre o tempo de realização da última mamografia (desfecho), foi ajustada uma regressão logística multinomial (função de ligação logito) considerando os pesos pós estratificação do Vigitel 2021.
+
+Como covariáveis de controle foram mapeadas algumas variáveis mensuradas na pesquisa, tendo por base as definições tradicionais para confundimento que envolvem três critérios: variável confundidora é preditora do desfecho, associada à exposição e não afetada pela exposição ou desfecho(8). As covariáveis identificadas como candidatas para o modelo de regressão multinomial foram: sociodemográficas - região, idade, estado conjugal atual, escolaridade (nível superior sim ou não); condições de saúde: depressão e inatividade física; e outros fatores: possuir plano de saúde que é a exposição analisada.
+
+Após análise exploratória dos dados, foi ajustado modelo de regressão logística multinomial de acordo com as seguintes etapas:
+
+1.  Foram obtidas as estimativas dos efeitos brutos de cada covariável sobre o desfecho com regressões simples (função de ligação logito). As variáveis candidatas ao modelo múltiplo foram aquelas que apresentaram significância ao nível de 2% (valor-p \<0,2).
+
+2.  A seleção de variáveis foi confirmada por um modelo de regressão de regularização Lasso. O hiperparâmetro (λ) ótimo utilizado foi lambda.1se cujo modelo é mais simples que o mínimo (lambda.min), mas que tem erro dentro de uma unidade de erro padrão do melhor modelo (lambda.min). Esta é uma abordagem heurística que possui méritos para reduzir o número de variáveis em processos de modelagem que envolvem muitas variáveis(9). Caso existam variáveis altamente correlacionadas, o método seleciona uma para permanecer na regressão e as demais são encolhidas a zero.
+
+3.  Considerando os efeitos brutos significativos ratificados pela regressão Lasso, construiu-se o modelo múltiplo com todas as variáveis selecionadas na etapa 1. O método de seleção de variáveis no modelo múltiplo considerou o teste de Wald para cada coeficiente. As variáveis que tiveram coeficientes significantes ao nível de 5% foram mantidas. A variável idade foi incluída no modelo independente da significância estatística devido a sua relevância teórica em estudos de epidemiologia(10).
+
+4.  A qualidade de ajuste do modelo final foi avaliada o teste Hosmer e Lemeshow e gráfico correspondente(11). Nesse teste, p-valores maiores que 0.05 indicam uma boa qualidade de ajuste do modelo. A avaliação dos pressupostos de lineariaride e indepndência foi realizada mediante disposição gráfica dos resíduos deviance.
+
+Como a variável de desfecho possui duas categorias, ter ou não realizado a última mamografia em até dois anos considerando a data da entrevista, o modelo teórico inicial pode ser representado da seguinte forma:
+
+```{r teorico, include=FALSE, message=FALSE, warning=FALSE}
+#Regressao logistica multipla - teorica
+#estado de saude
+mult_teor<-survey::svyglm(mam2 ~ regiao + idade + casada + superior 
+                         + depressao + inativa + estado_saude + plano, 
+                         family=quasibinomial(),design=BR.svy)
+summary(mult_teor)
+
+eq_teor<-equatiomatic::extract_eq(mult_svy)
+eq_teor
+
+```
+
+$$
+\ln\left[ \frac {P( \operatorname{mamog} ) }{ 1 - P( \operatorname{mamog} ) } \right] = \alpha + \beta_{1}(\operatorname{regiao}_{\operatorname{Nordeste}}) + \beta_{2}(\operatorname{regiao}_{\operatorname{Sudeste}}) + \beta_{3}(\operatorname{regiao}_{\operatorname{Sul}}) + \beta_{4}(\operatorname{regiao}_{\operatorname{Centro-Oeste}}) +
+$$
+
+$$
+\beta_{5}(\operatorname{idade}) +
+\beta_{6}(\operatorname{casada}_{\operatorname{Não}}) + 
+\beta_{7}(\operatorname{superior}_{\operatorname{Não}}) + \beta_{8}(\operatorname{depressao}_{\operatorname{Sim}}) +
+$$ $$
+\beta_{9}(\operatorname{inativa}_{\operatorname{Sim}})  + \beta_{10}(\operatorname{estado\_saude}_{\operatorname{Ruim}}) + \beta_{11}(\operatorname{plano}_{\operatorname{Não}})
+$$
+
+Os principais pacotes usados do software R v.4.1.2 ([http://www.r-project.org](http://www.r-project.org/)) foram: *survey* na definição do desenho amostral e modelagem, *hnp* e *generalhoslem* para diagnóstico de qualidade do ajuste. As análises estatísticas foram realizadas considerando o plano amostral com o peso pós-estratificação Vigitel 2021.
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
