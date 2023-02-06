@@ -2,25 +2,13 @@
 title: "ASSOCIAÇÃO ENTRE PLANO DE SAÚDE E MAMOGRAFIA EM MULHERES DE 50 A 69 ANOS NAS CAPITAIS BRASILEIRAS – UMA APLICAÇÃO DE REGRESSÃO LOGÍSTICA UTILIZANDO INQUÉRITO COM PLANO AMOSTRAL COMPLEXO"
 author: "Karla Ferreira"
 lang: pt
-format: 
-  pdf: 
-    documentclass: report
-    lof: true
-    lot: true
-    geometry:
-      - top=30mm
-      - left=20mm
-      - heightrounded
-    fontfamily: libertinus
-    colorlinks: true
-    cite-method: biblatex
-knitr: :
-  echo: false
-  warning: false    
-bibliography:
-    -modelos.bib
-
+date: today
+format:
+    pdf: default
+    html: 
+      self-contained: true
 ---
+
 
 ```{r pacotes, include=FALSE, message=FALSE, warning=FALSE}
 #instalar e carregar pacotes
@@ -50,7 +38,9 @@ df <- readxl::read_xls("Vigitel-2021-peso-rake.xls", col_types = "text")
 
 ```
 
-```{r organiza }
+```{r organiza,include=FALSE, message=FALSE, warning=FALSE }
+
+
 #1. Organizacao dos dados e dataframe
 #Subset variveis a serem usadas
 myvars<- c("cidade", "q6","q7", "civil", "q8a", "q74", "q81","q82", "q88",
@@ -139,7 +129,7 @@ names(df2)<-c("cidade","idade", "sexo" ,"civil","escolaridade", "estado_saude",
 summary(df2)
 
 #raridade do evento
-descr::freq(df2$mamografia)
+descr::freq(df2$mam2)
 
 # Analisando dados faltantes
 #df2 %>%
@@ -163,10 +153,13 @@ BR.svy <- survey::svydesign( id=~1, strata =NULL, fpc=NULL,
 # data -- data frame com os dados gerados
 
 # Estimando o total de mulheres q fizeram  mamografia na populacao
-survey::svytotal(~mam2, BR.svy)
+mam_pop<-survey::svytotal(~mam2, BR.svy)
 
 # Estimando prevalência de mulheres que fizeram exame - 84%
-survey::svymean(~mam2, BR.svy) 
+mam_prev<-survey::svymean(~mam2, BR.svy) 
+
+prev<-round((mam_prev[1])*100,1)
+
 ```
 
 ```{r tabela1, include=FALSE, message=FALSE, warning=FALSE}
@@ -180,11 +173,10 @@ tab1<- tableone::svyCreateTableOne(vars = c("regiao","idade","casada",
 
 tabela1sw<-print (tab1, showAllLevels = TRUE,nonnormal = "idade")
 
-#knitr::kable(tabela1sw)
 #row.names = c("N", "Região", "Idade", "Casada",
 #"Ensino superior", "Inatividade física", "Plano de saúde", 
 #"Estado de saúde"))
-#knitr::kable (tabela1sw)
+
 
 ```
 
@@ -254,7 +246,7 @@ eq_ajust<-equatiomatic::extract_eq(mult_svy)
 
 ```
 
-```{r,  message=FALSE, warning=FALSE}
+```{r,  include=FALSE, message=FALSE, warning=FALSE}
 #6. Qualidade do ajuste
 #Hosmer-Lemeshow Tests for Logistic Regression Models
 teste <- ResourceSelection::hoslem.test(df2$mam3, fitted(mult_svy))
@@ -279,7 +271,7 @@ AIC(mult_svy)
 
 ```
 
-```{r pressupostos}
+```{r pressupostos, include=FALSE, message=FALSE, warning=FALSE}
 #7.Avaliacao de pressupostos do modelo
 #independencia 
 #linearidade
@@ -304,7 +296,7 @@ lines(lowess(df2$idade,res.dev),col=3)
 
 ```
 
-```{r}
+```{r,include=FALSE, message=FALSE, warning=FALSE}
 #8. Resultados do modelo
 
 #summary(mult_svy)$coefficients
@@ -332,11 +324,9 @@ mod_res<- resultado%>%
   modify_footnote(mod_res, ci="IC = Intervalo de confiança", abbreviation = FALSE)
               
 
-mod_res
-
 ```
 
-```{r}
+```{r, include=FALSE, message=FALSE, warning=FALSE}
 #8.1 Resultados do modelo - grafico
 #Grafico de OR alternativo
 ## Load libraries
@@ -354,17 +344,19 @@ kable(se_mult_svy)
 OR_mult_svy<- round(exp(coefic),2)
 IC_mult_svy<-round(exp(confint(mult_svy)),2)
 
+exp_mod<- cbind(OR_mult_svy,IC_mult_svy)
+exp_mod<-exp_mod[-c(1,2),]
 
 ## data frame
 ## data frame
 dat <- data.frame(
   Index = c(1,2,3,4,5,6), ## This provides an order to the data
-  label = c("Casada: não", "Superior: não", "Inativa: sim ", 
-            "Estado de saúde: ruim", "Estado de saúde: SI",
-            "Consumo de FVL: maior", "Plano de saúde:ruim")
-  OR = exp_mod6[-1,1],
-  LL = exp_mod6[-1,2],
-  UL = exp_mod6[-1,3]
+  label = c("Casada:não", "Superior:não", "Inativa:sim", 
+            "Estado de saúde:ruim", "Estado de saúde:SI",
+             "Plano de saúde:não"),
+  OR = exp_mod[,1],
+  LL = exp_mod[,2],
+  UL = exp_mod[,3]
   
 )
 dat
@@ -374,7 +366,7 @@ plot1 <- ggplot(dat, aes(y = Index, x = OR)) +
   geom_point(shape = 18, size = 5) +  
   geom_errorbarh(aes(xmin = LL, xmax = UL), height = 0.25) +
   geom_vline(xintercept = 1, color = "red", linetype = "dashed", cex = 1, alpha = 0.5) +
-  scale_y_continuous(name = "", breaks=1:12, labels = dat$label, trans = "reverse") +
+  scale_y_continuous(name = "", breaks=1:6, labels = dat$label, trans = "reverse") +
   xlab("Odds Ratio (95% CI)") + 
   ylab(" ") + 
   theme_bw() +
@@ -390,10 +382,10 @@ plot1
 
 ```
 
-```{r}
 
-```
+**Resumo**
 
+O câncer de mama é a principal causa de morte por câncer entre as mulheres em todo o mundo. No Brasil, o Ministério da Saúde recomenda o rastreamento com mamografia a cada dois anos em mulheres com idade de 50 a 69 anos. Embora indicado a todas as mulheres dessa faixa etária, a Pesquisa Nacional de Saúde de 2019 do IBGE mostrou que a proporção de mulheres nesse grupo que haviam realizado mamografia nos últimos dois anos da pesquisa foi de 58,3%. O presente estudo teve como objetivo investigar se a posse de plano de saúde está associada a realização de mamografia para rastreamento do câncer de mama em mulheres com idade entre 50 e 69 anos na periodicidade recomendada. Foi realizada regressão logística com pesos pós-estratificação a partir dos dados de `r nrow(df2)` mulheres entrevistadas no Vigitel 2021 - *Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico*. Os resultados mostraram que a chance das mulheres entre 50 e 69 anos que não têm plano de saúde de terem realizado a última mamografia nos últimos dois anos é pelo menos 45% menor do que a chance do exame nesse período entre mulheres que possuíam plano de saúde (OR=`r exp_mod[6,1]`; IC 95%=`r exp_mod[6,2]`;`r exp_mod[6,3]`). Conclui-se que não possuir plano de saúde é um fator que dificulta o rastreio para o câncer de mama com mamografia na população de mulheres das capitais brasileiras no período recomendado pelo Ministério da Saúde
 
 **1. Introdução**
 
@@ -417,23 +409,21 @@ As moradoras entrevistadas responderam questionário que incluía questões soci
 
 Nesse estudo a variável de exposição foi possuir plano de saúde (dicotômica) e a variável de desfecho foi ter realizado ou não a última mamografia em até dois anos.
 
-Considerou-se como população alvo o grupo de mulheres de 50 a 69 anos residentes nas capitais brasileiras e no Distrito Federal. Essa é a faixa etária para às quais o rastreamento com mamografia bienal é recomendado(5).
+Considerou-se como população alvo o grupo de mulheres de 50 a 69 anos residentes nas capitais brasileiras e no Distrito Federal que já realizou alguma mamografia na vida. Essa é a faixa etária para as quais o rastreamento com mamografia bienal é recomendado(5).
 
 **2.2 Covariáveis de controle**
 
 Para estimar o efeito da posse do plano de saúde (exposição) sobre o tempo de realização da última mamografia (desfecho), foi ajustada uma regressão logística multinomial (função de ligação logito) considerando os pesos pós estratificação do Vigitel 2021.
 
-Como covariáveis de controle foram mapeadas algumas variáveis mensuradas na pesquisa, tendo por base as definições tradicionais para confundimento que envolvem três critérios: variável confundidora é preditora do desfecho, associada à exposição e não afetada pela exposição ou desfecho(8). As covariáveis identificadas como candidatas para o modelo de regressão multinomial foram: sociodemográficas - região, idade, estado conjugal atual, escolaridade (nível superior sim ou não); condições de saúde: depressão e inatividade física; e outros fatores: possuir plano de saúde que é a exposição analisada.
+Como covariáveis de controle foram mapeadas algumas variáveis mensuradas na pesquisa, tendo por base as definições tradicionais para confundimento que envolvem três critérios: variável confundidora é preditora do desfecho, associada à exposição e não afetada pela exposição ou desfecho(8). As covariáveis identificadas como candidatas para o modelo de regressão multinomial foram: sociodemográficas - região geográfica, idade, estado conjugal atual, escolaridade (nível superior sim ou não); condições de saúde: depressão, inatividade física e autoavaliação do estado de saúde (bom, ruim, sem informacão); e outros fatores: possuir plano de saúde que é a exposição analisada.
 
 Após análise exploratória dos dados, foi ajustado modelo de regressão logística multinomial de acordo com as seguintes etapas:
 
 1.  Foram obtidas as estimativas dos efeitos brutos de cada covariável sobre o desfecho com regressões simples (função de ligação logito). As variáveis candidatas ao modelo múltiplo foram aquelas que apresentaram significância ao nível de 2% (valor-p \<0,2).
 
-2.  A seleção de variáveis foi confirmada por um modelo de regressão de regularização Lasso. O hiperparâmetro (λ) ótimo utilizado foi lambda.1se cujo modelo é mais simples que o mínimo (lambda.min), mas que tem erro dentro de uma unidade de erro padrão do melhor modelo (lambda.min). Esta é uma abordagem heurística que possui méritos para reduzir o número de variáveis em processos de modelagem que envolvem muitas variáveis(9). Caso existam variáveis altamente correlacionadas, o método seleciona uma para permanecer na regressão e as demais são encolhidas a zero.
+2.  Considerando os efeitos brutos significativos, construiu-se o modelo múltiplo com todas as variáveis selecionadas na etapa 1. O método de seleção de variáveis no modelo múltiplo considerou o teste de Wald para cada coeficiente. As variáveis que tiveram coeficientes significantes ao nível de 5% foram mantidas. A variável idade foi incluída no modelo independente da significância estatística devido a sua relevância teórica em estudos de epidemiologia(10).
 
-3.  Considerando os efeitos brutos significativos ratificados pela regressão Lasso, construiu-se o modelo múltiplo com todas as variáveis selecionadas na etapa 1. O método de seleção de variáveis no modelo múltiplo considerou o teste de Wald para cada coeficiente. As variáveis que tiveram coeficientes significantes ao nível de 5% foram mantidas. A variável idade foi incluída no modelo independente da significância estatística devido a sua relevância teórica em estudos de epidemiologia(10).
-
-4.  A qualidade de ajuste do modelo final foi avaliada o teste Hosmer e Lemeshow e gráfico correspondente(11). Nesse teste, p-valores maiores que 0.05 indicam uma boa qualidade de ajuste do modelo. A avaliação dos pressupostos de lineariaride e indepndência foi realizada mediante disposição gráfica dos resíduos deviance.
+3.  A qualidade de ajuste do modelo final foi avaliada o teste Hosmer e Lemeshow e gráfico correspondente(11). Nesse teste, p-valores maiores que 0,05 indicam uma boa qualidade de ajuste do modelo. A avaliação dos pressupostos de lineariaride e independência foi realizada mediante disposição gráfica dos resíduos deviance.
 
 Como a variável de desfecho possui duas categorias, ter ou não realizado a última mamografia em até dois anos considerando a data da entrevista, o modelo teórico inicial pode ser representado da seguinte forma:
 
@@ -458,21 +448,60 @@ $$
 \beta_{5}(\operatorname{idade}) +
 \beta_{6}(\operatorname{casada}_{\operatorname{Não}}) + 
 \beta_{7}(\operatorname{superior}_{\operatorname{Não}}) + \beta_{8}(\operatorname{depressao}_{\operatorname{Sim}}) +
-$$ $$
-\beta_{9}(\operatorname{inativa}_{\operatorname{Sim}})  + \beta_{10}(\operatorname{estado\_saude}_{\operatorname{Ruim}}) + \beta_{11}(\operatorname{plano}_{\operatorname{Não}})
+$$
+
+$$
+\beta_{9}(\operatorname{inativa}_{\operatorname{Sim}})  + \beta_{10}(\operatorname{estado\_saude}_{\operatorname{Ruim}}) +
+\beta_{11}(\operatorname{estado\_saude}_{\operatorname{SI}}) +
+\beta_{12}(\operatorname{plano}_{\operatorname{Não}})
 $$
 
 Os principais pacotes usados do software R v.4.1.2 ([http://www.r-project.org](http://www.r-project.org/)) foram: *survey* na definição do desenho amostral e modelagem, *hnp* e *generalhoslem* para diagnóstico de qualidade do ajuste. As análises estatísticas foram realizadas considerando o plano amostral com o peso pós-estratificação Vigitel 2021.
 
-```{r}
-1 + 1
+**3. Resultados**
+
+Na amostra do Vigitel 2021, do total de `r nrow(df)` entrevistas, `r nrow(df2)` foram realizadas com mulheres com idade entre 50 e 69 anos que relataram já ter realizado alguma mamografia na vida. Considerando o desenho amostral do inquérito, obtemos a distribuição das variáveis sociodemográficas e de condições de saúde estimadas para a população das capitais brasileiras e do Distrito Federal (@tab-Tabela1). Dentre as mulheres com idade entre 50 e 69 anos que já fizeram alguma mamografia, a proporção de mulheres que realizaram nos dois anos últimos anos é de `r prev`%. Dentre as mulheres que realizaram o exame no tempo recomendado, 44,3% são casadas. A proporção de mulheres com nível superior é maior no grupo das que realizaram o último exame em até dois anos (31,7%) do que entre as que realizaram há mais tempo (14,6%). Quanto a autopercepção do estado de saúde, entre as que realizaram o exame no tempo certo, 41,4% classificam a saúde como ruim ou regular. Entre as que realizaram exame fora do período recomendado, 51,7% apresentam essa classificação. A proporção das que relataram possuir plano de saúde é 63,4% entre as que realizaram exame no tempo recomendado e 42,3% entre as que fizeram há mais tempo. A distribuição dessas variáveis indica de modo preliminar, possíveis associações com a realização da mamografia no período recomendado, o que será avaliado com maior detalhamento na seção seguinte.
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#| label: tbl-Tabela1
+#| warning: false
+
+knitr::kable (tabela1sw, col.names = c(" ", "Últimos dois anos: Sim", "Últimos dois anos:Não"),
+              )
 ```
 
-You can add options to executable code like this
+Os resultados do modelo de regressão logística múltiplo com os odds ratios estimados e respectivos intervalos de confiança (95%) para a realização de exame de mamografia nos últimos dois anos com pesos pós-estratificação Vigitel 2021 são apresentadas na @tab-Tabela2. As variáveis região geográfica e depressão não apresentaram significância superior a 0,2 nas regressões simples. A Figura 1 ilustra os efeitos ajustados das variáveis incluídas no modelo múltiplo.
 
-```{r}
-#| echo: false
-2 * 2
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#| label: tbl-Tabela2
+#| tbl-cap: "Efeitos ajustados"
+#| warning: false
+
+mod_res
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#| label: fig-Figura1
+#| fig-cap: "Efeitos ajustados"
+#| warning: false
+
+plot1
+
+```
+
+A equação do modelo obtido pode ser representada da seguinte forma:
+
+
+$$
+\log\left[ \frac { \widehat{P( \operatorname{mamog} )} }{ 1 - \widehat{P( \operatorname{mamog} )} } \right] = 5.39 - 0.06(\operatorname{idade}) - 0.35(\operatorname{casada}_{\operatorname{Não}}) 
+$$ 
+
+
+$$
+- 0.42(\operatorname{superior}_{\operatorname{Não}}) - 0.35(\operatorname{inativa}_{\operatorname{Sim}}) - 0.19(\operatorname{estado\_saude}_{\operatorname{Ruim}}) - 0.24(\operatorname{estado\_saude}_{\operatorname{SI}}) - 0.67(\operatorname{plano}_{\operatorname{Não}})
+$$
+
