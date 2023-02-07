@@ -1,5 +1,5 @@
 ---
-title: "ASSOCIAÇÃO ENTRE PLANO DE SAÚDE E MAMOGRAFIA EM MULHERES DE 50 A 69 ANOS NAS CAPITAIS BRASILEIRAS – UMA APLICAÇÃO DE REGRESSÃO LOGÍSTICA UTILIZANDO INQUÉRITO COM PLANO AMOSTRAL COMPLEXO"
+title: "Associação entre plano de saúde e mamografia em mulheres de 59 a 69 anos nas capitais brasileiras utilizando inquérito com plano amostral complexo"
 author: "Karla Ferreira"
 lang: pt
 date: today
@@ -7,8 +7,10 @@ format:
     pdf: default
     html: 
       self-contained: true
+bibliography:
+  - Modelos.bib
+csl: epidemiology.csl
 ---
-
 
 ```{r pacotes, include=FALSE, message=FALSE, warning=FALSE}
 #instalar e carregar pacotes
@@ -255,11 +257,11 @@ teste
 #Grafico - Hosmer e Lemeshow
 teste_banco <- data.frame(obs=teste$observed[,2], esp=teste$expected[,2])
 
+plot2<-
 ggplot(teste_banco, aes(x=obs, y=esp)) +
 geom_point() +
 geom_smooth() +labs(x="Observado",y="Esperado")+
-geom_abline(intercept=0, slope=1, size=0.5)+theme_bw()+theme(panel.grid=element_blank()) # linha de referência
-
+geom_abline(intercept=0, slope=1, size=0.5)+theme_bw()+theme(panel.grid=element_blank()) 
 #pseudo- R2
 1 - (mult_svy$deviance / mult_svy$null.deviance)
 
@@ -268,31 +270,6 @@ logLik(mult_svy)
 
 #AIC modelo_svy
 AIC(mult_svy)
-
-```
-
-```{r pressupostos, include=FALSE, message=FALSE, warning=FALSE}
-#7.Avaliacao de pressupostos do modelo
-#independencia 
-#linearidade
-
-res.dev<- residuals(mult_svy)#Residuos Deviance
-summary(res.dev)
-
-#Independencia 
-plot(res.dev,ylab="Resíduos Deviance",col="blue",main="Resíduos Deviance")
-lines(lowess(res.dev))
-abline(h=c(-2,0,2),col=c("red","grey","red"), lty=2)
-
-#O lowes (linha preta) apresenta ligeira curva, mas nao ha clusters de indivduos
-#indicando que nao ha fuga de independencia
-
-#log - linearidade
-plot(df2$idade,res.dev,ylab="Resíduos Deviance",col="darkgrey",main="Forma funcional",xlab="Idade")
-abline(h=c(-2,0,2),col=c("red","grey","red"), lty=2)
-lines(lowess(df2$idade,res.dev),col=3)
-#O lowes apresenta ligeira curva, mas nao indica
-# fuga de linearidade
 
 ```
 
@@ -378,18 +355,17 @@ plot1 <- ggplot(dat, aes(y = Index, x = OR)) +
         axis.text.y = element_text(size = 12, colour = "black"),
         axis.text.x.bottom = element_text(size = 12, colour = "black"),
         axis.title.x = element_text(size = 12, colour = "black"))
-plot1
+
 
 ```
 
-
 **Resumo**
 
-O câncer de mama é a principal causa de morte por câncer entre as mulheres em todo o mundo. No Brasil, o Ministério da Saúde recomenda o rastreamento com mamografia a cada dois anos em mulheres com idade de 50 a 69 anos. Embora indicado a todas as mulheres dessa faixa etária, a Pesquisa Nacional de Saúde de 2019 do IBGE mostrou que a proporção de mulheres nesse grupo que haviam realizado mamografia nos últimos dois anos da pesquisa foi de 58,3%. O presente estudo teve como objetivo investigar se a posse de plano de saúde está associada a realização de mamografia para rastreamento do câncer de mama em mulheres com idade entre 50 e 69 anos na periodicidade recomendada. Foi realizada regressão logística com pesos pós-estratificação a partir dos dados de `r nrow(df2)` mulheres entrevistadas no Vigitel 2021 - *Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico*. Os resultados mostraram que a chance das mulheres entre 50 e 69 anos que não têm plano de saúde de terem realizado a última mamografia nos últimos dois anos é pelo menos 45% menor do que a chance do exame nesse período entre mulheres que possuíam plano de saúde (OR=`r exp_mod[6,1]`; IC 95%=`r exp_mod[6,2]`;`r exp_mod[6,3]`). Conclui-se que não possuir plano de saúde é um fator que dificulta o rastreio para o câncer de mama com mamografia na população de mulheres das capitais brasileiras no período recomendado pelo Ministério da Saúde
+O câncer de mama é a principal causa de morte por câncer entre as mulheres em todo o mundo. No Brasil, o Ministério da Saúde recomenda o rastreamento com mamografia a cada dois anos em mulheres com idade de 50 a 69 anos. Embora indicado a todas as mulheres dessa faixa etária, a Pesquisa Nacional de Saúde de 2019 do IBGE mostrou que a proporção de mulheres nesse grupo que haviam realizado mamografia nos últimos dois anos da pesquisa foi de 58,3%. O presente estudo teve como objetivo investigar se a posse de plano de saúde está associada a realização de mamografia para rastreamento do câncer de mama em mulheres com idade entre 50 e 69 anos na periodicidade recomendada. Foi realizada regressão logística com pesos pós-estratificação a partir dos dados de `r nrow(df2)` mulheres entrevistadas no Vigitel 2021 - *Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico*. Os resultados mostraram que a chance das mulheres entre 50 e 69 anos que não têm plano de saúde de terem realizado a última mamografia nos últimos dois anos é pelo menos 45% menor do que a chance do exame nesse período entre mulheres que possuíam plano de saúde (OR=`r exp_mod[6,1]`; IC 95%=`r exp_mod[6,2]`;`r exp_mod[6,3]`). Conclui-se que não possuir plano de saúde é um fator que dificulta o rastreio para o câncer de mama com mamografia na população de mulheres das capitais brasileiras na frequência recomendada pelo Ministério da Saúde.
 
 **1. Introdução**
 
-O câncer de mama é a principal causa de morte por câncer entre as mulheres em todo o mundo e a carga da doença está mudando progressivamente dos países desenvolvidos para os países em desenvolvimento(1). No Brasil, o Instituto Nacional do Câncer (INCA) estimou 73.610 casos novos para o ano de 2023, o que representa uma taxa ajustada de incidência de 41,89 casos por 100.000 mulheres(2).
+O câncer de mama é a principal causa de morte por câncer entre as mulheres em todo o mundo e a carga da doença está mudando progressivamente dos países desenvolvidos para os países em desenvolvimento @ . No Brasil, o Instituto Nacional do Câncer (INCA) estimou 73.610 casos novos para o ano de 2023, o que representa uma taxa ajustada de incidência de 41,89 casos por 100.000 mulheres @torre .
 
 O aumento da taxa de mortalidade por câncer de mama em países em desenvolvimento tem como um dos grandes problemas o início tardio do tratamento, que em parte ocorre devido a demora do diagnóstico(3). Um estudo de revisão integrativa indicou como fatores responsáveis pela demora no tratamento em países da América Latina, o mau gerenciamento da doença, as barreiras de acesso, problemas de comunicação e o atraso no diagnóstico. Além disso renda, educação e origem étnica foram determinantes para a diferença nos tempos de início de tratamento(4).
 
@@ -462,9 +438,9 @@ Os principais pacotes usados do software R v.4.1.2 ([http://www.r-project.org](h
 
 Na amostra do Vigitel 2021, do total de `r nrow(df)` entrevistas, `r nrow(df2)` foram realizadas com mulheres com idade entre 50 e 69 anos que relataram já ter realizado alguma mamografia na vida. Considerando o desenho amostral do inquérito, obtemos a distribuição das variáveis sociodemográficas e de condições de saúde estimadas para a população das capitais brasileiras e do Distrito Federal (@tab-Tabela1). Dentre as mulheres com idade entre 50 e 69 anos que já fizeram alguma mamografia, a proporção de mulheres que realizaram nos dois anos últimos anos é de `r prev`%. Dentre as mulheres que realizaram o exame no tempo recomendado, 44,3% são casadas. A proporção de mulheres com nível superior é maior no grupo das que realizaram o último exame em até dois anos (31,7%) do que entre as que realizaram há mais tempo (14,6%). Quanto a autopercepção do estado de saúde, entre as que realizaram o exame no tempo certo, 41,4% classificam a saúde como ruim ou regular. Entre as que realizaram exame fora do período recomendado, 51,7% apresentam essa classificação. A proporção das que relataram possuir plano de saúde é 63,4% entre as que realizaram exame no tempo recomendado e 42,3% entre as que fizeram há mais tempo. A distribuição dessas variáveis indica de modo preliminar, possíveis associações com a realização da mamografia no período recomendado, o que será avaliado com maior detalhamento na seção seguinte.
 
-
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #| label: tbl-Tabela1
+#| tbl-cap: "Características da população segundo data da última mamografia."
 #| warning: false
 
 knitr::kable (tabela1sw, col.names = c(" ", "Últimos dois anos: Sim", "Últimos dois anos:Não"),
@@ -473,35 +449,116 @@ knitr::kable (tabela1sw, col.names = c(" ", "Últimos dois anos: Sim", "Últimos
 
 Os resultados do modelo de regressão logística múltiplo com os odds ratios estimados e respectivos intervalos de confiança (95%) para a realização de exame de mamografia nos últimos dois anos com pesos pós-estratificação Vigitel 2021 são apresentadas na @tab-Tabela2. As variáveis região geográfica e depressão não apresentaram significância superior a 0,2 nas regressões simples. A Figura 1 ilustra os efeitos ajustados das variáveis incluídas no modelo múltiplo.
 
+O efeito médio da variável de exposição (posse de plano de saúde) sobre o desfecho (ter realizado a última mamografia nos últimos dois anos) controlado pelas demais variáveis foi significante (valor-p\<0,001). A chance de mulheres de 50 a 69 anos estimada para a população das capitais brasileiras e do Distrito Federal que não possuem plano de saúde de terem realizado a última mamografia nos últimos 2 anos é 49% menor que a chance das que possuem.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #| label: tbl-Tabela2
-#| tbl-cap: "Efeitos ajustados"
+#| tbl-cap: "Resultados do modelo - efeitos ajustados."
 #| warning: false
 
 mod_res
 
 ```
 
-
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #| label: fig-Figura1
-#| fig-cap: "Efeitos ajustados"
+#| fig-cap: "Resultados do modelo -efeitos ajustados"
 #| warning: false
+#| out.width: "60%"
 
 plot1
 
 ```
 
-A equação do modelo obtido pode ser representada da seguinte forma:
-
+A equação do modelo ajustado pode ser representada da seguinte forma:
 
 $$
 \log\left[ \frac { \widehat{P( \operatorname{mamog} )} }{ 1 - \widehat{P( \operatorname{mamog} )} } \right] = 5.39 - 0.06(\operatorname{idade}) - 0.35(\operatorname{casada}_{\operatorname{Não}}) 
-$$ 
-
+$$
 
 $$
 - 0.42(\operatorname{superior}_{\operatorname{Não}}) - 0.35(\operatorname{inativa}_{\operatorname{Sim}}) - 0.19(\operatorname{estado\_saude}_{\operatorname{Ruim}}) - 0.24(\operatorname{estado\_saude}_{\operatorname{SI}}) - 0.67(\operatorname{plano}_{\operatorname{Não}})
-$$
+$$ Na sequência, são apresentadas as análises para qualidade do ajuste do modelo. O resultado do teste de Hosmer e Lemeshow indicou boa qualidade de ajuste (p-valor= `r round(teste$p.value,2)`), conforme ilustrado na Figura 2. Esse gráfico representa a comparação dos valores observados com os esperados para cada um dos 10 grupos (decis dos valores preditos). Os pontos estão próximos à linha preta que corresponde a coincidência entre valores observados e esperados, indicando bom ajuste.
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#| label: fig-Figura2
+#| fig-cap: "Qualidade do ajuste:Hosmer e Lemeshow."
+#| warning: false
+#| out.width: "60%"
+
+plot2
+
+```
+
+Observa-se nas Figuras 3 e 4 que os pressupostos de independência e linearidade da regressão logística são atendidos, de forma que podemos interpretar seus resultados.
+
+```{r, include=FALSE, message=FALSE, warning=FALSE}
+res.dev<- residuals(mult_svy)#Residuos Deviance
+summary(res.dev)
+
+```
+
+```{r, echo=FALSE}
+#| label: fig-Figura3
+#| fig-cap: "Pressupostos do modelo - Independência."
+#| warning: false
+#| out.width: "60%"
+
+#7.Avaliacao de pressupostos do modelo
+#independencia 
+
+#Independencia 
+plot(res.dev,ylab="Resíduos Deviance",col="blue")
+lines(lowess(res.dev))
+abline(h=c(-2,0,2),col=c("red","grey","red"), lty=2)
+
+#O lowes (linha preta) apresenta ligeira curva, mas nao ha clusters de indivduos
+#indicando que nao ha fuga de independencia
+
+```
+
+```{r, echo=FALSE}
+#| label: fig-Figura4
+#| fig-cap: "Pressupostos do modelo - Linearidade."
+#| warning: false
+#| out.width: "60%"
+
+#7.Avaliacao de pressupostos do modelo
+#independencia 
+
+#log - linearidade
+plot(df2$idade,res.dev,ylab="Resíduos Deviance",col="darkgrey",xlab="Idade")
+abline(h=c(-2,0,2),col=c("red","grey","red"), lty=2)
+lines(lowess(df2$idade,res.dev),col=3)
+#O lowes apresenta ligeira curva, mas nao indica
+# fuga de linearidade
+
+```
+
+**4. Discussão**
+
+Os cuidados preventivos com a saúde como a realização de exames de rastreamento de câncer estão associados a fatores socioeconômicos, ambientais e culturais. Nesse aspecto, a posse de plano de saúde parece se comportar como fator de proteção para a realização de exames preventivos(12).
+
+De acordo com estudo realizado a partir do Suplemento Saúde da Pesquisa Nacional por Amostra de Domicílios (PNAD 2003 e 2008) que incluiu mulheres a partir de 40 anos na modelagem, verificou-se que a chance de realização do exame é maior entre as mulheres de 50 a 69 anos e aumenta com a renda familiar e com a escolaridade. Entre as mulheres casadas, a chance de realizar o exame aumenta para as que consultaram médico e têm plano de saúde. O objetivo nesse trabalho foi analisar fatores individuais, socioeconômicos e geográficos associados à realização de mamografia no Brasil. Esse estudo também verificou que a prevalência de realização de mamografia entre as mulheres que possuíam plano de saúde foi de 60% enquanto das que não possuíam foi de 27%, e que as mulheres que tem plano de saúde fazem mais mamografia(13). Um outro estudo com dados da PNAD 2003 mostrou que a realização da mamografia apresentou associações positivas e independentes com a localização urbana do domicílio, macrorregião de residência, escolaridade, renda domiciliar, exame de Papanicolau, número de consultas médicas e com a cobertura por plano de saúde(14).
+
+O propósito em nosso estudo, foi investigar a associação entre a realização de mamografia em mulheres de 50 a 69 anos no tempo oportuno, ou seja, a cada 2 anos, conforme preconizado pelo Ministério da Saúde(5). Essa escolha se deve ao desejo de investigar se o grupo para o qual as políticas públicas recomendam esse tipo de rastreamento depende da posse de plano para realizar o exame. Em nosso trabalho, nesse grupo mais específico, também foram percebidos os efeitos das variáveis, idade, escolaridade, estado conjugal (aqui utilizadas para controle), assim como o efeito direto da posse de plano de saúde sobre realizar mamografia no período recomendado. Foi dada ênfase ao efeito da posse de plano de saúde sobre o tempo de realização do último exame. Foi observado que a chance mulheres que não têm plano de saúde de terem realizado esse exame há mais de 5 anos é pelo menos duas vezes a chance das que possuem plano de saúde terem feito o exame nesse período. De acordo com os resultados, mulheres que não têm plano de saúde têm a chance de ter realizado o último exame há muito mais tempo dos que as que têm.
+
+Para definir com maior rigor teórico as variáveis de controle seria necessária uma abordagem mais complexa, considerando modelos conceituais que regem o acesso aos serviços de saúde. No estudo sobre condicionantes socioeconômicos e geográficos do acesso à mamografia no Brasil, os autores utilizaram um modelo conceitual sobre rastreamento de câncer de mama para definir as variáveis independentes do modelo, que se relacionam à necessidade do exame, percepção/comportamento, demanda e oferta. Nesse trabalho as covariáveis foram: idade, estado de saúde, realização de consulta médica nos últimos 12 meses, renda familiar, cor ou raça, plano de saúde, urbanização, região de residência e distância entre residência e local do exame(13). Sobre esse aspecto, nosso estudo poderia acrescer a variável estado de saúde, relativa à autopercepção informada pela entrevistada, também presente no Vigitel e possível confundidora em nossa investigação. Também não se avaliou interação de variáveis, o que requer suporte teórico quanto à plausibilidade biológica(15).
+
+As principais limitações desse estudo estão relacionadas aos métodos de análise. Foram apresentados dois modelos, um sem considerar os pesos pós-estratificação do Vigitel 2021 e outro com esses pesos. Essa abordagem se deve ao fato de não ter sido possível avaliar a qualidade do ajuste no modelo com peso amostral devido à classe do objeto gerada para esse modelo pelo pacote svyVGAM (Design-Based Inference in Vector Generalised Linear Models). Essa classe de objeto não permite a exportação de elementos para análise de resíduos. O gráfico de envelope simulado não funciona com objetos da classe svyVGAM e os elementos necessários para sua elaboração de forma manual não são acessíveis. Trata-se de uma biblioteca desenvolvida recentemente (versão 1.1 de 14/06/2022) cuja função svy_vglm fornece inferências para dados de amostras complexas chamando a função vglm com os pesos amostrais e replicando esses pesos com processos reamostragem.
+
+Com relação à regressão Lasso, o pacote glmnet ajusta um modelo multinomial simétrico, onde cada classe é representada por um modelo linear (na escala logarítmica). Esse modelo "multinomial" de duas classes produz o mesmo ajuste que o modelo "binomial" correspondente, exceto que o par de matrizes de coeficientes é igual em magnitude e oposto em sinal e metade dos valores "binomiais"(16). Esse modelo foi elaborado com o objetivo de confirmar a seleção de variáveis e não foi utilizado para fins de interpretação dos efeitos das variáveis estudadas.
+
+Também é importante frisar que o objetivo desse estudo se situa fora de uma perspectiva de inferência causal, deseja-se apenas verificar de forma controlada a associação do plano de saúde na realização do exame de mamografia em determinado intervalo de tempo. A limitação se deve ao desenho do estudo seccional, que não permite definir a temporalidade dos eventos, ou seja, se o plano de saúde é anterior à realização da mamografia. Assim, podemos lidar com o fenômeno da causalidade reversa, pois não sabemos se possuir plano induziu a realização de mamografia ou se não ter realizado mamografia induziu a aquisição de um plano de saúde.
+
+**5. Conclusão**
+
+Os resultados desse trabalho mostraram ser possível investigar se a posse de plano de saúde está associada à realização de mamografia para rastreamento do câncer de mama em mulheres com idade entre 50 e 69 anos a partir de amostra representativa do Vigitel 2021, utilizando-se regressão logística multinomial. As técnicas empreendidas com o uso desses dados têm a vantagem de permitir a generalização dos resultados para a população feminina desta faixa etária residente nas capitais brasileiras e no Distrito Federal. Os nossos achados acompanham as conclusões de outros estudos realizados no Brasil a partir de dados secundários de pesquisas com amostra complexa(13,14). O presente estudo reflete as condições das capitais brasileiras, onde existe a maior densidade de mamógrafos, portanto o acesso ao exame pode ser mais crítico fora das regiões urbanas, onde existem menos equipamentos.
+
+Conclui-se que não possuir plano de saúde é um fator que determina a realização de rastreio para o câncer de mama com mamografia fora da periodicidade recomendada. Dessa forma, são necessários maiores esforços no âmbito do Sistema Único de Saúde para garantir o acesso universal ao exame de acordo com os critérios definidos nas Diretrizes para a Detecção Precoce do Câncer de Mama no Brasil(5), de forma a reduzir as persistentes desigualdades em saúde nos dias de hoje.
+
+**6. Informações adicionais**
+
+O código criado para realização deste trabalho, assim como o banco de dados e o dicionário de dados encontram-se disponíveis no endereço: https://github.com/karlaferrer/Relatorios
+
+**7. Referências**
