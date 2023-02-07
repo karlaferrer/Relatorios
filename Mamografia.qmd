@@ -358,13 +358,11 @@ plot1 <- ggplot(dat, aes(y = Index, x = OR)) +
 
 ```
 
-^1^Programa de Pós-Graduação Stricto-Sensu em Epidemiologia em Saúde Pública, Escola Nacional de Saúde Pública Sergio Arouca, Fundação Oswaldo Cruz.
-Rio de Janeiro, fevereiro de 2023. 
-
+^1^Programa de Pós-Graduação Stricto-Sensu em Epidemiologia em Saúde Pública, Escola Nacional de Saúde Pública Sergio Arouca, Fundação Oswaldo Cruz. Rio de Janeiro, fevereiro de 2023.
 
 **Resumo**
 
-O câncer de mama é a principal causa de morte por câncer entre as mulheres em todo o mundo. No Brasil, o Ministério da Saúde recomenda o rastreamento com mamografia a cada dois anos em mulheres com idade de 50 a 69 anos. Embora indicado a todas as mulheres dessa faixa etária, a Pesquisa Nacional de Saúde de 2019 do IBGE mostrou que a proporção de mulheres nesse grupo que haviam realizado mamografia nos últimos dois anos da pesquisa foi de 58,3%. O presente estudo teve como objetivo investigar se a posse de plano de saúde está associada a realização de mamografia para rastreamento do câncer de mama em mulheres com idade entre 50 e 69 anos na periodicidade recomendada. Foi realizada regressão logística com pesos pós-estratificação a partir dos dados de `r nrow(df2)` mulheres entrevistadas no Vigitel 2021 - *Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico*. Os resultados mostraram que a chance das mulheres entre 50 e 69 anos que não têm plano de saúde de terem realizado a última mamografia nos últimos dois anos é pelo menos 45% menor do que a chance do exame nesse período entre mulheres que possuíam plano de saúde (OR=`r exp_mod[6,1]`; IC 95%=`r exp_mod[6,2]`;`r exp_mod[6,3]`). Conclui-se que não possuir plano de saúde é um fator que dificulta o rastreio para o câncer de mama com mamografia na população de mulheres das capitais brasileiras na frequência recomendada pelo Ministério da Saúde.
+O câncer de mama é a principal causa de morte por câncer entre as mulheres em todo o mundo. No Brasil, o Ministério da Saúde recomenda o rastreamento com mamografia a cada dois anos em mulheres com idade de 50 a 69 anos. Embora indicado a todas as mulheres dessa faixa etária, a Pesquisa Nacional de Saúde de 2019 do IBGE mostrou que a proporção de mulheres nesse grupo que haviam realizado mamografia nos últimos dois anos da pesquisa foi de 58,3%. O presente estudo teve como objetivo investigar se a posse de plano de saúde está associada a realização de mamografia para rastreamento do câncer de mama em mulheres com idade entre 50 e 69 anos na periodicidade recomendada. Foi realizada regressão logística com pesos pós-estratificação a partir dos dados de `r nrow(df2)` mulheres entrevistadas no Vigitel 2021 - *Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico*. Os resultados mostraram que a chance das mulheres entre 50 e 69 anos que não têm plano de saúde de terem realizado a última mamografia nos últimos dois anos é pelo menos 55% menor do que a chance do exame nesse período entre mulheres que possuíam plano de saúde (OR=`r exp_mod[6,1]`; IC 95%=`r exp_mod[6,2]`;`r exp_mod[6,3]`). Conclui-se que não possuir plano de saúde é um fator que dificulta o rastreio para o câncer de mama com mamografia na população de mulheres das capitais brasileiras na frequência recomendada pelo Ministério da Saúde.
 
 \newpage
 
@@ -374,7 +372,7 @@ O câncer de mama é a principal causa de morte por câncer entre as mulheres em
 
 O aumento da taxa de mortalidade por câncer de mama em países em desenvolvimento tem como um dos grandes problemas o início tardio do tratamento, que em parte ocorre devido a demora do diagnóstico [@demelosantos2020]. Um estudo de revisão integrativa indicou como fatores responsáveis pela demora no tratamento em países da América Latina, o mau gerenciamento da doença, as barreiras de acesso, problemas de comunicação e o atraso no diagnóstico. Além disso renda, educação e origem étnica foram determinantes para a diferença nos tempos de início de tratamento [@freitas2015].
 
-No Brasil, dentre as diversas tecnologias para a detecção precoce do câncer de mama, o Ministério da Saúde recomenda o rastreamento com mamografia a cada dois anos em mulheres com idade entre 50 e 69 anos, pois é nesse grupo etário que se evidencia o melhor equilíbrio entre riscos e benefícios [@diretriz2015]. De acordo com a edição de 2021 do Vigitel - Vigilância *de* Fatores *de* Risco *e* Proteção *para* DoençasCrônicasporInquérito *Telefônico* [@ministériodasaúde.secretariadevigilânciaemsaúde.departamentodeanáliseemsaúdeevigilânciadedoenças]*,* a proporção de mulheres de 50 a 69 anos que realizaram mamografia pelo menos uma vez nos últimos dois anos nas capitais brasileiras e no Distrito Federal foi de 72,8%. A Pesquisa Nacional de Saúde de 2019 do IBGE[@institutobrasileirodegeografiaeestatística-ibge], que é representativa de todos os estados, mostrou que a proporção de mulheres que haviam realizado mamografia nos últimos dois anos foi 58,3% no Brasil. Os resultados da PNS 2019 indicaram uma importante variação regional quanto à cobertura na faixa etária preconizada, sendo a menor observada na Região Norte (43,2%) e a maior na Região Sudeste (65,2%). Essa pesquisa também evidencia diferenças no acesso ao exame associadas à escolaridade, renda e raça[@institutobrasileirodegeografiaeestatística-ibge].
+No Brasil, dentre as diversas tecnologias para a detecção precoce do câncer de mama, o Ministério da Saúde recomenda o rastreamento com mamografia a cada dois anos em mulheres com idade entre 50 e 69 anos, pois é nesse grupo etário que se evidencia o melhor equilíbrio entre riscos e benefícios [@diretriz2015]. De acordo com a edição de 2021 do Vigitel - *Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico* [@ministériodasaúde.secretariadevigilânciaemsaúde.departamentodeanáliseemsaúdeevigilânciadedoenças],a proporção de mulheres de 50 a 69 anos que realizaram mamografia pelo menos uma vez nos últimos dois anos nas capitais brasileiras e no Distrito Federal foi de 72,8%. A Pesquisa Nacional de Saúde de 2019 do IBGE[@institutobrasileirodegeografiaeestatística-ibge], que é representativa de todos os estados, mostrou que a proporção de mulheres que haviam realizado mamografia nos últimos dois anos foi 58,3% no Brasil. Os resultados da PNS 2019 indicaram uma importante variação regional quanto à cobertura na faixa etária preconizada, sendo a menor observada na Região Norte (43,2%) e a maior na Região Sudeste (65,2%). Essa pesquisa também evidencia diferenças no acesso ao exame associadas à escolaridade, renda e raça[@institutobrasileirodegeografiaeestatística-ibge].
 
 Considerando os diferentes níveis de cobertura observados nas regiões geográficas do Brasil, assim como as diferenças devido à raça, escolaridade e renda, o objetivo desse trabalho foi investigar se a posse de plano de saúde está associada à realização de mamografia para rastreamento do câncer de mama em mulheres com idade entre 50 e 69 anos na periodicidade recomendada.
 
@@ -394,17 +392,17 @@ Considerou-se como população alvo o grupo de mulheres de 50 a 69 anos resident
 
 **2.2 Covariáveis de controle**
 
-Para estimar o efeito da posse do plano de saúde (exposição) sobre o tempo de realização da última mamografia (desfecho), foi ajustada uma regressão logística multinomial (função de ligação logito) considerando os pesos pós estratificação do Vigitel 2021.
+Para estimar o efeito da posse do plano de saúde (exposição) sobre o tempo de realização da última mamografia (desfecho), foi ajustada uma regressão logística (função de ligação logito) considerando os pesos pós estratificação do Vigitel 2021.
 
-Como covariáveis de controle foram mapeadas algumas variáveis mensuradas na pesquisa, tendo por base as definições tradicionais para confundimento que envolvem três critérios: variável confundidora é preditora do desfecho, associada à exposição e não afetada pela exposição ou desfecho(8). As covariáveis identificadas como candidatas para o modelo de regressão multinomial foram: sociodemográficas - região geográfica, idade, estado conjugal atual, escolaridade (nível superior sim ou não); condições de saúde: depressão, inatividade física e autoavaliação do estado de saúde (bom, ruim, sem informacão); e outros fatores: possuir plano de saúde que é a exposição analisada.
+As covariáveis de controle foram mapeadas tendo por base as definições tradicionais para confundimento que envolvem três critérios: variável confundidora é preditora do desfecho, associada à exposição e não afetada pela exposição ou desfecho [@pearce2018]. As covariáveis identificadas como candidatas para o modelo de regressão logística foram: sociodemográficas - região geográfica, idade, estado conjugal atual, escolaridade (nível superior sim ou não); condições de saúde: depressão, inatividade física e autoavaliação do estado de saúde (bom, ruim, sem informacão - SI); e outros fatores: possuir plano de saúde, que é a exposição analisada.
 
-Após análise exploratória dos dados, foi ajustado modelo de regressão logística multinomial de acordo com as seguintes etapas:
+Após análise exploratória dos dados, foi ajustado modelo de regressão logística de acordo com as seguintes etapas:
 
 1.  Foram obtidas as estimativas dos efeitos brutos de cada covariável sobre o desfecho com regressões simples (função de ligação logito). As variáveis candidatas ao modelo múltiplo foram aquelas que apresentaram significância ao nível de 2% (valor-p \<0,2).
 
 2.  Considerando os efeitos brutos significativos, construiu-se o modelo múltiplo com todas as variáveis selecionadas na etapa 1. O método de seleção de variáveis no modelo múltiplo considerou o teste de Wald para cada coeficiente. As variáveis que tiveram coeficientes significantes ao nível de 5% foram mantidas. A variável idade foi incluída no modelo independente da significância estatística devido a sua relevância teórica em estudos de epidemiologia [@rothman2008].
 
-3.  A qualidade de ajuste do modelo final foi avaliada o teste Hosmer e Lemeshow e gráfico correspondente(11). Nesse teste, p-valores maiores que 0,05 indicam uma boa qualidade de ajuste do modelo. A avaliação dos pressupostos de lineariaride e independência foi realizada mediante disposição gráfica dos resíduos deviance.
+3.  A qualidade de ajuste do modelo final foi avaliada segundo o teste Hosmer e Lemeshow e gráfico correspondente(11). Nesse teste, p-valores maiores que 0,05 indicam uma boa qualidade de ajuste do modelo. A avaliação dos pressupostos de lineariaride e independência foi realizada mediante disposição gráfica dos resíduos deviance.
 
 Como a variável de desfecho possui duas categorias, ter ou não realizado a última mamografia em até dois anos considerando a data da entrevista, o modelo teórico inicial pode ser representado da seguinte forma:
 
@@ -437,11 +435,11 @@ $$
 \beta_{12}(\operatorname{plano}_{\operatorname{Não}})
 $$
 
-Os principais pacotes usados do software R v.4.1.2 ([http://www.r-project.org](http://www.r-project.org/)) foram: *survey* na definição do desenho amostral e modelagem, *hnp* e *generalhoslem* para diagnóstico de qualidade do ajuste. As análises estatísticas foram realizadas considerando o plano amostral com o peso pós-estratificação Vigitel 2021.
+Os principais pacotes usados do software R v.4.1.2 ([http://www.r-project.org](http://www.r-project.org/)) foram: *survey* na definição do desenho amostral e modelagem; e *ResourceSelection* para diagnóstico de qualidade do ajuste. As análises estatísticas foram realizadas considerando o plano amostral com o peso pós-estratificação Vigitel 2021.
 
 **3. Resultados**
 
-Na amostra do Vigitel 2021, do total de `r nrow(df)` entrevistas, `r nrow(df2)` foram realizadas com mulheres com idade entre 50 e 69 anos que relataram já ter realizado alguma mamografia na vida. Considerando o desenho amostral do inquérito, obtemos a distribuição das variáveis sociodemográficas e de condições de saúde estimadas para a população das capitais brasileiras e do Distrito Federal (@tbl-Tabela1). Dentre as mulheres com idade entre 50 e 69 anos que já fizeram alguma mamografia, a proporção de mulheres que realizaram nos dois anos últimos anos é de `r prev`%. Dentre as mulheres que realizaram o exame no tempo recomendado, 44,3% são casadas. A proporção de mulheres com nível superior é maior no grupo das que realizaram o último exame em até dois anos (31,7%) do que entre as que realizaram há mais tempo (14,6%). Quanto a autopercepção do estado de saúde, entre as que realizaram o exame no tempo certo, 41,4% classificam a saúde como ruim ou regular. Entre as que realizaram exame fora do período recomendado, 51,7% apresentam essa classificação. A proporção das que relataram possuir plano de saúde é 63,4% entre as que realizaram exame no tempo recomendado e 42,3% entre as que fizeram há mais tempo. A distribuição dessas variáveis indica de modo preliminar, possíveis associações com a realização da mamografia no período recomendado, o que será avaliado com maior detalhamento na seção seguinte.
+Na amostra do Vigitel 2021, do total de `r nrow(df)` entrevistas, `r nrow(df2)` foram realizadas com mulheres com idade entre 50 e 69 anos que relataram já ter realizado alguma mamografia na vida. Considerando o desenho amostral do inquérito, obtemos a distribuição das variáveis sociodemográficas e de condições de saúde estimadas para a população das capitais brasileiras e do Distrito Federal (@tbl-Tabela1). Dentre as mulheres com idade entre 50 e 69 anos que já fizeram alguma mamografia, `r prev`% realizaram esse exame nos dois últimos anos. 44,3% ds mulheres que realizaram o exame no tempo recomendado são casadas. A proporção de mulheres com nível superior é maior no grupo das que realizaram o último exame em até dois anos (31,7%) do que entre as que realizaram há mais tempo (14,6%). Quanto a autopercepção do estado de saúde, entre as que realizaram o exame no tempo certo, 41,4% classificam a saúde como ruim ou regular. Entre as que realizaram exame fora do período recomendado, 51,7% apresentam essa classificação. A proporção das que relataram possuir plano de saúde é de 63,4% entre as que realizaram exame no tempo recomendado e de 42,3% entre as que fizeram há mais tempo. A distribuição dessas variáveis indica de modo preliminar, possíveis associações com a realização da mamografia no período recomendado, o que será avaliado com maior detalhamento na seção seguinte.
 
 \newpage
 
@@ -454,9 +452,9 @@ knitr::kable (tabela1sw, col.names = c(" ", "Últimos dois anos: Sim", "Últimos
               )
 ```
 
-Os resultados do modelo de regressão logística múltiplo com os odds ratios estimados e respectivos intervalos de confiança (95%) para a realização de exame de mamografia nos últimos dois anos com pesos pós-estratificação Vigitel 2021 são apresentadas na @tbl-Tabela2. As variáveis região geográfica e depressão não apresentaram significância superior a 0,2 nas regressões simples. A @fig-Figura1 ilustra os efeitos ajustados das variáveis incluídas no modelo múltiplo.
+Os resultados do modelo de regressão logística múltiplo com os *odds ratios* estimados e respectivos intervalos de confiança (95%) para a realização de exame de mamografia nos últimos dois anos com pesos pós-estratificação Vigitel 2021 são apresentados na @tbl-Tabela2. As variáveis região geográfica e depressão não apresentaram significância superior a 0,2 nas regressões simples. A @fig-Figura1 ilustra os efeitos ajustados das variáveis incluídas no modelo múltiplo.
 
-O efeito médio da variável de exposição (posse de plano de saúde) sobre o desfecho (ter realizado a última mamografia nos últimos dois anos) controlado pelas demais variáveis foi significante (valor-p\<0,001). A chance de mulheres de 50 a 69 anos estimada para a população das capitais brasileiras e do Distrito Federal que não possuem plano de saúde de terem realizado a última mamografia nos últimos 2 anos é 49% menor que a chance das que possuem.
+O efeito médio da variável de exposição (posse de plano de saúde) sobre o desfecho (ter realizado a última mamografia nos últimos dois anos) controlado pelas demais variáveis foi significante (valor-p\<0,001). A chance de mulheres de 50 a 69 anos estimada para a população das capitais brasileiras e do Distrito Federal que não possuem plano de saúde de terem realizado a última mamografia nos últimos 2 anos é em média 49% menor que a chance das que possuem.
 
 \newpage
 
@@ -489,6 +487,7 @@ $$
 $$
 - 0.42(\operatorname{superior}_{\operatorname{Não}}) - 0.35(\operatorname{inativa}_{\operatorname{Sim}}) - 0.19(\operatorname{estado\_saude}_{\operatorname{Ruim}}) - 0.24(\operatorname{estado\_saude}_{\operatorname{SI}}) - 0.67(\operatorname{plano}_{\operatorname{Não}})
 $$ 
+
 Na sequência, são apresentadas as análises para qualidade do ajuste do modelo. O resultado do teste de Hosmer e Lemeshow indicou boa qualidade de ajuste (p-valor= `r round(teste$p.value,2)`), conforme ilustrado na @fig-Figura2. Esse gráfico representa a comparação dos valores observados com os esperados para cada um dos 10 grupos (decis dos valores preditos). Os pontos estão próximos à linha preta que corresponde a coincidência entre valores observados e esperados, indicando bom ajuste.
 
 ```{r Figura2, echo=FALSE, message=FALSE, warning=FALSE}
@@ -501,7 +500,7 @@ plot2
 
 ```
 
-Observa-se a seguir, (@fig-Figura3 e @fig-Figura4) que os pressupostos de independência e linearidade da regressão logística são atendidos, de forma que podemos interpretar seus resultados do modelo.
+Observa-se a seguir, (@fig-Figura3 e @fig-Figura4) que os pressupostos de independência e linearidade da regressão logística são atendidos, de forma que podemos interpretar seus resultados do modelo obtido.
 
 ```{r, include=FALSE, message=FALSE, warning=FALSE}
 res.dev<- residuals(mult_svy)#Residuos Deviance
